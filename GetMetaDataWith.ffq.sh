@@ -1,0 +1,34 @@
+#!/bin/bash
+#SBATCH --job-name=GetMetaDataWith_ffq.sh
+#SBATCH --partition=batch
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=24
+#SBATCH --mem=50gb
+#SBATCH --time=1:00:00
+#SBATCH --output=./fetchfastq.%j.out
+#SBATCH --error=./fetchfastq.%j.err
+
+cd $SLURM_SUBMIT_DIR
+
+##This script takes an input of SRR accession #s one per line. For each accessiob. Edit last line to include path to your list of accessions.
+#Your accession file should include one accession per line with no other information.
+
+accession="/scratch/seg75580/downloadSRA/accession"
+
+module load ffq/0.3.1-GCCcore-13.3.0
+
+#make a directory to store fastq metadata [.JSON] format and files.
+mkdir /scratch/seg75580/downloadSRA/FastqFiles
+
+#For each line of the accession file, make a directory and fetch fastq metadata using ffq
+
+while read -r line
+do
+#make a new directory for each accession
+  mkdir /scratch/seg75580/downloadSRA/FastqFiles/${line}
+#download metadata and store in a .JSON file
+  ffq -o /scratch/seg75580/downloadSRA/FastqFiles/${line}/${line}.json --ftp "$line"
+
+done <"${accession}"
